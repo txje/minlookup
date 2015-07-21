@@ -19,7 +19,6 @@
 #include "../klib/kseq.h" // FASTA/Q parser
 #include "../klib/kvec.h" // C dynamic vector
 #include "../klib/khash.h" // C hash table/dictionary
-#include "xxHash/xxhash.c" // fast hashing
 
 typedef struct {
   uint32_t hash;
