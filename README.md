@@ -12,7 +12,7 @@ Installation
     git clone https://github.com/attractivechaos/klib.git klib
     [fetch and build MinLookup]
     git clone https://github.com/txje/minlookup.git src
-    gcc minlookup/ml_fasta.c -o minlookup
+    gcc src/ml_fasta.c -o minlookup
 
 
 Usage
