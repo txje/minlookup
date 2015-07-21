@@ -4,10 +4,15 @@ MinLookup
 Fast memory-efficient pre-alignment of long high-error sequences using locality-sensitive hashing
 
 
-Compile
+Installation
 -------
 
-    gcc ml_fasta.c -o minlookup
+    [add klib dependency]
+    mkdir src
+    git clone https://github.com/attractivechaos/klib.git klib
+    [fetch and build MinLookup]
+    git clone https://github.com/txje/minlookup.git src
+    gcc minlookup/ml_fasta.c -o minlookup
 
 
 Usage
