@@ -19,7 +19,6 @@
 #include "../klib/kseq.h" // FASTA/Q parser
 #include "../klib/kvec.h" // C dynamic vector
 #include "../klib/khash.h" // C hash table/dictionary
-#include "xxHash/xxhash.c" // fast hashing
 
 typedef struct {
   uint32_t hash;
@@ -33,9 +32,14 @@ typedef struct {
   uint32_t pos;
 } readMin;
 
+typedef struct {
+  uint32_t qpos;
+  uint32_t tpos;
+} posPair;
+
 typedef kvec_t(readMin) matchVec;
 
-typedef kvec_t(int) offsetVec;
+typedef kvec_t(posPair) offsetVec;
 
 typedef kvec_t(Min*) minVec;
 
@@ -45,7 +49,7 @@ KSEQ_INIT(FILE*, fileread);
 // creates uint32:kvec<readNum,pos> hash
 KHASH_MAP_INIT_INT(minDict, matchVec);
 
-// creates uint32:kvec<uint32> hash
+// creates uint32:kvec<posPair> hash
 KHASH_MAP_INIT_INT(overlapDict, offsetVec);
 
 Min* minhash (char *s, int k, int h, uint32_t hash_seeds[], unsigned char reverse) {
@@ -186,7 +190,7 @@ int ml_fasta(char *query_fa, char *target_fa, int k, int h, int seed, int thresh
   // -------------------------------------------------------------------------------
 
   // ---------------------------- Look up hashes in dictionary ------------------------------
-  int q, qidx, qrev, m, offset, ret_val;
+  int q, qidx, qrev, m, ret_val;
   uint32_t target;
   khint_t bin; // hash bin (result of kh_put, kh_get)
   Min *qmin;
@@ -214,7 +218,10 @@ int ml_fasta(char *query_fa, char *target_fa, int k, int h, int seed, int thresh
           if(ret_val == 1) { // bin is empty (unset)
             kv_init(kh_value(overlaps, bin)); // kh_value should already be defined as type matchVec
           }
-          kv_push(int, kh_value(overlaps, bin), matches.a[m].pos - qmin[i].pos);
+          posPair ppair; // to store matching query/target positions
+          ppair.qpos = qmin[i].pos;
+          ppair.tpos = matches.a[m].pos;
+          kv_push(posPair, kh_value(overlaps, bin), ppair);
         }
       }
       // count hits and compute offset for each target
@@ -226,12 +233,20 @@ int ml_fasta(char *query_fa, char *target_fa, int k, int h, int seed, int thresh
         target = kh_key(overlaps, iter);
         offsets = kh_val(overlaps, iter);
         if(offsets.n >= threshold) {
+          /*
+           * To compute offset directly:
+           *
           offset = 0;
           for(i = 0; i < offsets.n; i++) {
-            offset = offset + offsets.a[i];
+            offset = offset + (offset.a[i].tpos - offsets.a[i].qpos);
           }
           offset = offset / (int)offsets.n; // offsets.n is a size_t, does not play nicely
-          printf("%d,%d,%d,%d,%d\n", q, qrev, target, offsets.n, offset);
+           *
+           */
+          printf("%d,%d,%d,%d", q, qrev, target, offsets.n);
+          for(i = 0; i < offsets.n; i++)
+            printf(",%d:%d", offsets.a[i].qpos, offsets.a[i].tpos);
+          printf("\n");
         }
         kv_destroy(offsets);
       }
@@ -251,7 +266,7 @@ int ml_fasta(char *query_fa, char *target_fa, int k, int h, int seed, int thresh
 }
 
 int main(int argc, char *argv[]) {
-  if(argc < 6) {
+  if(argc < 8) {
     printf("Usage: ml_fasta <query_fasta> <target_fasta> <k> <h> <seed> <threshold> <max_kmer_hits>\n");
     printf("  query_fasta: FASTA file containing reads\n");
     printf("  target_fasta: FASTA file containing reads\n");
