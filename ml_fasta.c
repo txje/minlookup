@@ -61,11 +61,13 @@ Min* minhash (char *s, int k, int h, uint32_t hash_seeds[], unsigned char revers
   Min* m = (Min*)malloc(sizeof(Min)*h);
 
   for(j = 0; j < h; j++) {
+    // initialize [if a whole read is Gs, it will actually have a minhash value == UINT32_MAX, in which case the position will be 0]
     m[j].hash = UINT32_MAX;
+    m[j].pos = 0;
   }
 
   // set up kmer uint32
-  uint32_t kmer = 0;
+  uint32_t kmer = 0, xor_kmer = 0;
   int rev_shift = 2*(k-1);
   for(i = 0; i < k-1; i++) {
     if(reverse == 0) {
@@ -87,9 +89,9 @@ Min* minhash (char *s, int k, int h, uint32_t hash_seeds[], unsigned char revers
     }
 
     for(j = 0; j < h; j++) {
-      kmer = kmer ^ hash_seeds[j];
-      if(kmer < m[j].hash) {
-        m[j].hash = kmer;
+      xor_kmer = kmer ^ hash_seeds[j];
+      if(xor_kmer < m[j].hash) {
+        m[j].hash = xor_kmer;
         m[j].pos = i;
       }
     }
@@ -243,6 +245,7 @@ int ml_fasta(char *query_fa, char *target_fa, int k, int h, int seed, int thresh
           offset = offset / (int)offsets.n; // offsets.n is a size_t, does not play nicely
            *
            */
+
           printf("%d,%d,%d,%d", q, qrev, target, offsets.n);
           for(i = 0; i < offsets.n; i++)
             printf(",%d:%d", offsets.a[i].qpos, offsets.a[i].tpos);
@@ -289,6 +292,6 @@ int main(int argc, char *argv[]) {
   int seed = atoi(argv[5]);
   int threshold = atoi(argv[6]);
   int max_kmers = atoi(argv[7]);
-  //printf("PROCESSING ONLY FIRST 1000 READS\n");
+
   return ml_fasta(query_fasta, target_fasta, k, h, seed, threshold, max_kmers, -1);
 }
