@@ -285,13 +285,28 @@ int main(int argc, char *argv[]) {
   char *target_fasta = argv[2];
   int k = atoi(argv[3]);
   if(k > 16) {
-    printf("Current optimizations do not allow for k > 16");
+    printf("Current optimizations do not allow for k > 16\n");
     return -1;
   }
   int h = atoi(argv[4]);
   int seed = atoi(argv[5]);
   int threshold = atoi(argv[6]);
   int max_kmers = atoi(argv[7]);
+
+  // test if files exist
+  FILE* fp;
+  fp = fopen(query_fasta, "r");
+  if(fp == NULL) {
+    printf("File '%s' does not exist\n", query_fasta);
+    return -1;
+  }
+  fclose(fp);
+  fp = fopen(target_fasta, "r");
+  if(fp == NULL) {
+    printf("File '%s' does not exist\n", target_fasta);
+    return -1;
+  }
+  fclose(fp);
 
   return ml_fasta(query_fasta, target_fasta, k, h, seed, threshold, max_kmers, -1);
 }
