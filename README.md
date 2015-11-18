@@ -20,13 +20,13 @@ Usage
 
 Command line:
 
-    minlookup <query_fasta> <target_fasta> <k> <h> <seed> <threshold> <max_kmer_count> <output>
+    minlookup &lt;query_fasta> &lt;target_fasta> &lt;k> &lt;h> &lt;seed> &lt;threshold> &lt;max_kmer_count> &lt;output>
 
 
 ml_fasta.c
 ----------
 
-Parameters: <query_fasta> <target_fasta> <k> <h> <seed> <threshold>
+Parameters: &lt;query_fasta> &lt;target_fasta> &lt;k> &lt;h> &lt;seed> &lt;threshold>
 
 Query and target files may be the same, in which case it will do pairwise comparison
 
