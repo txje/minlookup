@@ -7,10 +7,8 @@ Fast memory-efficient pre-alignment of long high-error sequences using locality-
 Installation
 -------
 
-    [add klib dependency]
     mkdir src
     git clone https://github.com/attractivechaos/klib.git klib
-    [fetch and build MinLookup]
     git clone https://github.com/txje/minlookup.git src
     gcc src/ml_fasta.c -o minlookup
 
@@ -20,7 +18,7 @@ Usage
 
 Command line:
 
-    minlookup &lt;query_fasta> &lt;target_fasta> &lt;k> &lt;h> &lt;seed> &lt;threshold> &lt;max_kmer_count> &lt;output>
+    minlookup <query_fasta> <target_fasta> <k> <h> <seed> <threshold> <max_kmer_count> <output>
 
 
 ml_fasta.c
